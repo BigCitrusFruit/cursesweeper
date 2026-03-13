@@ -68,7 +68,7 @@ int main() {
 	init_color(COLOR_GREEN, 0, 700, 0);
 	init_color(COLOR_WHITE, 750, 750, 750);
 	init_color(COLOR_LLGREEN, 0, 850, 0);
-	init_color(COLOR_BEIGE, 700, 700, 100);
+	init_color(COLOR_BEIGE, 500, 500, 300);
 
 	init_pair(PAIR_BORDER, COLOR_BLACK, COLOR_WHITE);
 	init_pair(PAIR_LFIELD, COLOR_WHITE, COLOR_GREEN);
