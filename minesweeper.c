@@ -24,6 +24,7 @@ typedef struct coord {
 #define COLOR_DDGREEN 9
 #define COLOR_LLGREEN 10
 #define COLOR_BEIGE 11
+#define COLOR_DBEIGE 16
 #define PAIR_BORDER 1
 #define PAIR_LFIELD 2
 #define PAIR_DFIELD 3
@@ -31,6 +32,8 @@ typedef struct coord {
 #define PAIR_FLAG 5
 #define PAIR_CLEARED 6
 #define PAIR_SAFE 7
+#define PAIR_DCLEARED 12
+#define PAIR_DSAFE 13
 
 /* actual macros */
 #define CURSOR_ON(s) wattron(s,COLOR_PAIR(PAIR_CURSOR));wattron(s,A_BOLD)
@@ -69,6 +72,7 @@ int main() {
 	init_color(COLOR_WHITE, 750, 750, 750);
 	init_color(COLOR_LLGREEN, 0, 850, 0);
 	init_color(COLOR_BEIGE, 500, 500, 300);
+	init_color(COLOR_DBEIGE, 400, 400, 100);
 
 	init_pair(PAIR_BORDER, COLOR_BLACK, COLOR_WHITE);
 	init_pair(PAIR_LFIELD, COLOR_WHITE, COLOR_GREEN);
@@ -77,6 +81,8 @@ int main() {
 	init_pair(PAIR_FLAG, COLOR_YELLOW, COLOR_BLUE);
 	init_pair(PAIR_CLEARED, COLOR_BLACK, COLOR_BEIGE);
 	init_pair(PAIR_SAFE, COLOR_WHITE, COLOR_BEIGE);
+	init_pair(PAIR_DCLEARED, COLOR_BLACK, COLOR_DBEIGE);
+	init_pair(PAIR_DSAFE, COLOR_WHITE, COLOR_DBEIGE);
 	
 	noecho();
 	curs_set(0);
@@ -225,10 +231,18 @@ void fixCell(int yy, int xx) {
 		cellContents = 'F';
 	} else if (fieldState[location].isCleared) {
 		if (fieldState[location].surroundingMines == 0) {
-			wattron(field,COLOR_PAIR(PAIR_SAFE));
+			if ((xx % 2) ^ (yy % 2)) {
+				wattron(field,COLOR_PAIR(PAIR_SAFE));
+			} else {
+				wattron(field,COLOR_PAIR(PAIR_DSAFE));
+			}
 			cellContents = ' ';
 		} else {
-			wattron(field,COLOR_PAIR(PAIR_CLEARED));
+			if ((xx % 2) ^ (yy % 2)) {
+				wattron(field,COLOR_PAIR(PAIR_CLEARED));
+			} else {
+				wattron(field,COLOR_PAIR(PAIR_DCLEARED));
+			}
 			cellContents = '0' + fieldState[location].surroundingMines;
 		}
 	} else {
