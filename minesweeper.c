@@ -23,6 +23,7 @@ typedef struct coord {
 #define COLOR_DGREEN 8
 #define COLOR_DDGREEN 9
 #define COLOR_LLGREEN 10
+#define COLOR_BEIGE 11
 #define PAIR_BORDER 1
 #define PAIR_LFIELD 2
 #define PAIR_DFIELD 3
@@ -67,14 +68,15 @@ int main() {
 	init_color(COLOR_GREEN, 0, 700, 0);
 	init_color(COLOR_WHITE, 750, 750, 750);
 	init_color(COLOR_LLGREEN, 0, 850, 0);
+	init_color(COLOR_BEIGE, 700, 700, 100);
 
 	init_pair(PAIR_BORDER, COLOR_BLACK, COLOR_WHITE);
 	init_pair(PAIR_LFIELD, COLOR_WHITE, COLOR_GREEN);
 	init_pair(PAIR_DFIELD, COLOR_WHITE, COLOR_DGREEN);
 	init_pair(PAIR_CURSOR, COLOR_BLACK, COLOR_MAGENTA);
 	init_pair(PAIR_FLAG, COLOR_YELLOW, COLOR_BLUE);
-	init_pair(PAIR_CLEARED, COLOR_RED, COLOR_DDGREEN);
-	init_pair(PAIR_SAFE, COLOR_WHITE, COLOR_LLGREEN);
+	init_pair(PAIR_CLEARED, COLOR_BLACK, COLOR_BEIGE);
+	init_pair(PAIR_SAFE, COLOR_WHITE, COLOR_BEIGE);
 	
 	noecho();
 	curs_set(0);
