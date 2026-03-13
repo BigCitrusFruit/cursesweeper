@@ -1,0 +1,6 @@
+minesweeper
+build
+*.pdf
+MakeFile
+CMakeFiles
+CMakeCache.txt
