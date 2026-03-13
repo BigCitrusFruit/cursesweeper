@@ -1,5 +1,5 @@
-project(minesweeper)
 cmake_minimum_required(VERSION 3.10)
+project(minesweeper)
 
 find_package(Curses)
 if(Curses_FOUND AND NOT TARGET Curses::Curses)
