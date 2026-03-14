@@ -54,6 +54,7 @@ int cursorX;
 cell fieldState[(FIELD_HEIGHT-2)*(FIELD_WIDTH-2)];
 bool firstMove = true;
 int location;
+int destroyedCount = 0;
 
 int main() {
 	/* window setup */
@@ -181,6 +182,9 @@ int gameLoop() {
 						generateMines();
 						firstMove = false;
 					}
+					if (fieldState[location].isCleared == false) {
+						destroyedCount++;
+					}
 					fieldState[location].isCleared = true;
 					CURSOR_ON(field);
 					mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
@@ -193,6 +197,9 @@ int gameLoop() {
 					CURSOR_OFF(field);
 					if (fieldState[location].hasMine) {
 						return 0;
+					}
+					if (destroyedCount + MINE_COUNT >= sizeof(fieldState)/sizeof(fieldState[0])) {
+						return 1;
 					}
 				}
 				break;
@@ -311,6 +318,9 @@ void generateMines() {
 void clearZeros(int yy, int xx) {
 	coord checkList[8] = {{-1,-1},{0,-1},{1,-1},{1,0},{1,1},{0,1},{-1,1},{-1,0}};
 	cell *stab;
+	if (getCell(yy,xx)->isCleared == false) {
+		destroyedCount++;
+	}
 	getCell(yy,xx)->isCleared = true;
 	for (int dir = 0; dir < 8; dir++) {
 		int checkY = checkList[dir].y + yy;
@@ -319,6 +329,9 @@ void clearZeros(int yy, int xx) {
 		if (stab == NULL) continue;
 		if ((stab->surroundingMines == 0) && !(stab->isCleared)) {
 			clearZeros(checkY, checkX);	
+		}
+		if (stab->isCleared == false) {
+			destroyedCount++;
 		}
 		stab->isCleared = true;
 		fixCell(checkY, checkX);
