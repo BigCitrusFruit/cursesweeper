@@ -290,7 +290,7 @@ void generateMines() {
 	for (int ii = 0; ii < MINE_COUNT; ii++) { //generate mines randomly across the field
 		do {
 			poke = rand() % (fieldLength);
-			if (fieldState[poke].hasMine) {
+			if (fieldState[poke].hasMine || poke == location) {
 				isValid = false;
 			} else {
 				isValid = true;
@@ -328,7 +328,7 @@ void clearZeros(int yy, int xx) {
 		stab = getCell(checkY, checkX);
 		if (stab == NULL) continue;
 		if ((stab->surroundingMines == 0) && !(stab->isCleared)) {
-			clearZeros(checkY, checkX);	
+			clearZeros(checkY, checkX);
 		}
 		if (stab->isCleared == false) {
 			destroyedCount++;
