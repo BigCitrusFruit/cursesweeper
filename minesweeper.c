@@ -42,6 +42,8 @@ char getCellContents(int yy, int xx);
 void generateMines();
 cell *getCell(int yy, int xx);
 void clearZeros(int yy, int xx);
+int clearCell();
+void flagCell();
 
 /* global variables */
 WINDOW *field;
@@ -51,6 +53,7 @@ cell fieldState[(FIELD_HEIGHT-2)*(FIELD_WIDTH-2)];
 bool firstMove = true;
 int location;
 int destroyedCount = 0;
+int max_y, max_x;
 
 int main() {
 	/* window setup */
@@ -80,7 +83,6 @@ int main() {
 	noecho();
 	curs_set(0);
 	keypad(stdscr,true);
-	int max_y, max_x;
 	getmaxyx(stdscr, max_y, max_x);
 	refresh();
 	field = newwin(FIELD_HEIGHT, FIELD_WIDTH,
@@ -110,6 +112,7 @@ int main() {
 		fieldState[ii].hasFlag = false;
 		fieldState[ii].isCleared = false;
 	}
+	mousemask(ALL_MOUSE_EVENTS, NULL);
 	wrefresh(field);
 	int win = gameLoop();
 	delwin(field);
@@ -125,10 +128,12 @@ int main() {
 }
 
 int gameLoop() {
+	MEVENT mouse;
 	int keyPress;
+	int value;
 	while (true) {
 		wrefresh(field);
-		int location = (cursorY-1)+((FIELD_HEIGHT-2)*(cursorX-1));
+		// int location = (cursorY-1)+((FIELD_HEIGHT-2)*(cursorX-1));
 		keyPress = getch();
 		switch (keyPress) {
 			case KEY_UP:
@@ -169,48 +174,44 @@ int gameLoop() {
 				break;
 			case 'c':
 			case 'C':
-				if (!(fieldState[location].isCleared) && !(fieldState[location].hasFlag)) {
-					if (firstMove) {
-						generateMines();
-						firstMove = false;
-					}
-					if (fieldState[location].isCleared == false) {
-						destroyedCount++;
-					}
-					fieldState[location].isCleared = true;
-					CURSOR_ON(field);
-					mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
-					CURSOR_OFF(field);
-					if (fieldState[location].surroundingMines == 0) {
-						clearZeros(cursorY-1,cursorX-1);
-						CURSOR_ON(field);
-						mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
-					}
-					CURSOR_OFF(field);
-					if (fieldState[location].hasMine) {
-						return 0;
-					}
-					if (destroyedCount + MINE_COUNT >= sizeof(fieldState)/sizeof(fieldState[0])) {
-						return 1;
-					}
+				value = clearCell();
+				if (value != 2) {
+					return value;
 				}
 				break;
 			case 'x':
 			case 'X':
-				if (!(fieldState[location].isCleared)) {
-					fieldState[location].hasFlag = !(fieldState[location].hasFlag);
-					CURSOR_ON(field);
-					mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
-					CURSOR_OFF(field);
-					wattron(field,COLOR_PAIR(PAIR_BORDER));
-					mvwprintw(field, 0, 8,"  ");
-					int flagCount = 0;
-					for (int ii = 0; ii < ((FIELD_HEIGHT-1)*(FIELD_WIDTH-2)); ii++) {
-						if (fieldState[ii].hasFlag) {
-							flagCount++;
+				flagCell();
+				break;
+			case KEY_MOUSE:
+				if (getmouse(&mouse) == OK) {
+					if (mouse.y - ((max_y/2)-(FIELD_HEIGHT/2)) > 0 && 
+						mouse.y - ((max_y/2)-(FIELD_HEIGHT/2)) < FIELD_HEIGHT-1 &&
+						mouse.x - ((max_x/2)-(FIELD_WIDTH/2)) > 0 &&
+						mouse.x - ((max_x/2)-(FIELD_WIDTH/2)) < FIELD_WIDTH-1
+						) { 
+						if (mouse.bstate & BUTTON1_CLICKED) {
+							fixCell(cursorY-1,cursorX-1);
+							cursorY = mouse.y - ((max_y/2)-(FIELD_HEIGHT/2));
+							cursorX = mouse.x - ((max_x/2)-(FIELD_WIDTH/2));
+							CURSOR_ON(field);
+							mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
+							CURSOR_OFF(field);
+							value = clearCell();
+							if (value != 2) {
+								return value;
+							}
+						} else if (mouse.bstate & BUTTON3_CLICKED) {
+							fixCell(cursorY-1,cursorX-1);
+							cursorY = mouse.y - ((max_y/2)-(FIELD_HEIGHT/2));
+							cursorX = mouse.x - ((max_x/2)-(FIELD_WIDTH/2));
+							CURSOR_ON(field);
+							mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
+							CURSOR_OFF(field);
+							flagCell();
 						}
 					}
-					mvwprintw(field, 0, 8,"%d",MINE_COUNT-flagCount);
+
 				}
 				break;
 			case 'q':
@@ -336,4 +337,52 @@ cell *getCell(int yy, int xx) {
 		return NULL;
 	}
 	return &(fieldState[yy+((FIELD_HEIGHT-2)*xx)]); //return cell
+}
+
+int clearCell() {
+	int location = (cursorY-1)+((FIELD_HEIGHT-2)*(cursorX-1));
+	if (!(fieldState[location].isCleared) && !(fieldState[location].hasFlag)) {
+		if (firstMove) {
+			generateMines();
+			firstMove = false;
+		}
+		if (fieldState[location].isCleared == false) {
+			destroyedCount++;
+		}
+		fieldState[location].isCleared = true;
+		CURSOR_ON(field);
+		mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
+		CURSOR_OFF(field);
+		if (fieldState[location].surroundingMines == 0) {
+			clearZeros(cursorY-1,cursorX-1);
+			CURSOR_ON(field);
+			mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
+		}
+		CURSOR_OFF(field);
+		if (fieldState[location].hasMine) {
+			return 0;
+		}
+		if (destroyedCount + MINE_COUNT >= sizeof(fieldState)/sizeof(fieldState[0])) {
+			return 1;
+		}
+	}
+	return 2;
+}
+void flagCell() {
+	int location = (cursorY-1)+((FIELD_HEIGHT-2)*(cursorX-1));
+	if (!(fieldState[location].isCleared)) {
+		fieldState[location].hasFlag = !(fieldState[location].hasFlag);
+		CURSOR_ON(field);
+		mvwaddch(field,cursorY,cursorX,getCellContents(cursorY,cursorX));
+		CURSOR_OFF(field);
+		wattron(field,COLOR_PAIR(PAIR_BORDER));
+		mvwprintw(field, 0, 8,"  ");
+		int flagCount = 0;
+		for (int ii = 0; ii < ((FIELD_HEIGHT-1)*(FIELD_WIDTH-2)); ii++) {
+			if (fieldState[ii].hasFlag) {
+				flagCount++;
+			}
+		}
+		mvwprintw(field, 0, 8,"%d",MINE_COUNT-flagCount);
+	}
 }
