@@ -21,10 +21,10 @@ typedef struct coord {
 
 /* color and pair definitions */
 #define COLOR_DGREEN 8
-#define COLOR_DDGREEN 9
-#define COLOR_LLGREEN 10
-#define COLOR_BEIGE 11
-#define COLOR_DBEIGE 16
+#define COLOR_LLGREEN 9
+#define COLOR_BEIGE 10
+#define COLOR_DBEIGE 1
+#define COLOR_BBLACK 11
 #define PAIR_BORDER 1
 #define PAIR_LFIELD 2
 #define PAIR_DFIELD 3
@@ -32,8 +32,8 @@ typedef struct coord {
 #define PAIR_FLAG 5
 #define PAIR_CLEARED 6
 #define PAIR_SAFE 7
-#define PAIR_DCLEARED 12
-#define PAIR_DSAFE 13
+#define PAIR_DCLEARED 8
+#define PAIR_DSAFE 9
 
 /* actual macros */
 #define CURSOR_ON(s) wattron(s,COLOR_PAIR(PAIR_CURSOR));wattron(s,A_BOLD)
@@ -64,25 +64,30 @@ int main() {
 		endwin();
 		return 1;
 	}
+	if (!can_change_color()) {
+		printf("cant change colors :(\n");
+		endwin();
+		return 1;
+	}
 	raw();
 	start_color();
 	use_default_colors();
 	init_color(COLOR_DGREEN, 0, 525, 0);
-	init_color(COLOR_DDGREEN, 0 , 350, 0);
 	init_color(COLOR_GREEN, 0, 700, 0);
 	init_color(COLOR_WHITE, 750, 750, 750);
 	init_color(COLOR_LLGREEN, 0, 850, 0);
 	init_color(COLOR_BEIGE, 500, 500, 300);
 	init_color(COLOR_DBEIGE, 400, 400, 100);
+	init_color(COLOR_BBLACK, 0, 0, 0);
 
-	init_pair(PAIR_BORDER, COLOR_BLACK, COLOR_WHITE);
+	init_pair(PAIR_BORDER, COLOR_BBLACK, COLOR_WHITE);
 	init_pair(PAIR_LFIELD, COLOR_WHITE, COLOR_GREEN);
 	init_pair(PAIR_DFIELD, COLOR_WHITE, COLOR_DGREEN);
-	init_pair(PAIR_CURSOR, COLOR_BLACK, COLOR_MAGENTA);
+	init_pair(PAIR_CURSOR, COLOR_BBLACK, COLOR_MAGENTA);
 	init_pair(PAIR_FLAG, COLOR_YELLOW, COLOR_BLUE);
-	init_pair(PAIR_CLEARED, COLOR_BLACK, COLOR_BEIGE);
+	init_pair(PAIR_CLEARED, COLOR_BBLACK, COLOR_BEIGE);
 	init_pair(PAIR_SAFE, COLOR_WHITE, COLOR_BEIGE);
-	init_pair(PAIR_DCLEARED, COLOR_BLACK, COLOR_DBEIGE);
+	init_pair(PAIR_DCLEARED, COLOR_BBLACK, COLOR_DBEIGE);
 	init_pair(PAIR_DSAFE, COLOR_WHITE, COLOR_DBEIGE);
 	
 	noecho();
